@@ -7,6 +7,7 @@ import org.springframework.statemachine.config.EnableStateMachine;
 import org.springframework.statemachine.config.EnumStateMachineConfigurerAdapter;
 import org.springframework.statemachine.config.builders.StateMachineStateConfigurer;
 import org.springframework.statemachine.config.builders.StateMachineTransitionConfigurer;
+import org.springframework.statemachine.config.configurers.StateConfigurer.History;
 
 @Configuration
 @EnableStateMachine
@@ -17,25 +18,41 @@ public class StateMachineConfig extends EnumStateMachineConfigurerAdapter<State,
             throws Exception {
         states
             .withStates()
-                .initial(State.S1)
-                .states(EnumSet.allOf(State.class));
+                .initial(State.RUNNING)
+                .state(State.POWEROFF)
+                .end(State.END)
+                .and()
+                .withStates()
+                .parent(State.RUNNING)
+                .initial(State.WASHING)
+                .state(State.RINSING)
+                .state(State.DRYING)
+                .history(State.HISTORY, History.SHALLOW);
     }
     
     @Override
     public void configure(StateMachineTransitionConfigurer<State,Event> transitions)
             throws Exception {
         transitions
-            .withExternal()
-                .source(State.S1)
-                .target(State.S2)
-                .event(Event.E1)
-                .action(receivePayment())
-            .and()
-            .withExternal()
-                .source(State.S2)
-                .target(State.S3)
-                .event(Event.E2)
-                .action(action2());
+        .withExternal()
+        .source(State.WASHING).target(State.RINSING)
+        .event(Event.RINSE)
+        .and()
+    .withExternal()
+        .source(State.RINSING).target(State.DRYING)
+        .event(Event.DRY)
+        .and()
+    .withExternal()
+        .source(State.RUNNING).target(State.POWEROFF)
+        .event(Event.CUTPOWER)
+        .and()
+    .withExternal()
+        .source(State.POWEROFF).target(State.HISTORY)
+        .event(Event.RESTOREPOWER)
+        .and()
+    .withExternal()
+        .source(State.RUNNING).target(State.END)
+        .event(Event.STOP);
         
 }
 
