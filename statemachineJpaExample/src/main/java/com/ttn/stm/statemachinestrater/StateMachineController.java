@@ -1,13 +1,16 @@
 package com.ttn.stm.statemachinestrater;
 
+import java.util.HashSet;
+
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.config.StateMachineFactory;
+import org.springframework.statemachine.data.ActionRepository;
 import org.springframework.statemachine.data.StateRepository;
 import org.springframework.statemachine.data.TransitionRepository;
+import org.springframework.statemachine.data.jpa.JpaRepositoryAction;
 import org.springframework.statemachine.data.jpa.JpaRepositoryState;
 import org.springframework.statemachine.data.jpa.JpaRepositoryTransition;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,6 +26,9 @@ public class StateMachineController {
 
   @Autowired
   private TransitionRepository<JpaRepositoryTransition> transitionRepository;
+  
+  @Autowired
+  private ActionRepository<JpaRepositoryAction> actionRepository;
 
   @Autowired
   private StateMachineFactory<String, String> stateMachineFactory;
@@ -64,6 +70,12 @@ public class StateMachineController {
     JpaRepositoryState stateS3 = stateRepository.findOne((long) 3);
     JpaRepositoryTransition transitionS1ToS2 = new JpaRepositoryTransition(stateS1, stateS2, "E1");
     JpaRepositoryTransition transitionS2ToS3 = new JpaRepositoryTransition(stateS2, stateS3, "E2");
+    HashSet actions=new HashSet<>();
+    JpaRepositoryAction action=actionRepository.findOne((long)1);
+    JpaRepositoryAction action2=actionRepository.findOne((long)2);
+    actions.add(action);
+    actions.add(action2);
+    transitionS1ToS2.setActions(actions);
     transitionS1ToS2.setMachineId("machine1");
     transitionS2ToS3.setMachineId("machine1");
     transitionRepository.save(transitionS1ToS2);
@@ -72,6 +84,20 @@ public class StateMachineController {
     return "transition created succesfully";
 
   }
+  
+  @RequestMapping(value = "/action", method = RequestMethod.POST)
+  public java.lang.String createAction() throws Exception {
+   
+   JpaRepositoryAction action1=new JpaRepositoryAction();
+   action1.setSpel("new com.ttn.stm.action.TestAction().sendEmail()");
+   actionRepository.save(action1);
+   JpaRepositoryAction action2 =new JpaRepositoryAction();
+   action2.setName("testAction");
+   actionRepository.save(action2);
+    return "action created succesfully";
+
+  }
+  
 
   @RequestMapping(value = "/replaceevent", method = RequestMethod.POST)
   public java.lang.String replaceEvent() throws Exception {
