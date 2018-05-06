@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: statemachine-sample
+  output:
+    ansi:
+      enabled: always
+  datasource:
+    url: jdbc:mysql://localhost:3306/statemachinedemo?autoReconnect=true&useUnicode=yes&characterEncoding=UTF-8
+    username: root
+    password: root
+    
+  jpa:
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: create
+      

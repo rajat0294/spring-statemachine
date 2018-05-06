@@ -32,10 +32,9 @@ public class DBStateMachineConfiguration extends StateMachineConfigurerAdapter<S
   
   @Override
   public void configure(StateMachineModelConfigurer<String, String> model) throws Exception {
-      model 
+      model
           .withModel()
-              .factory(modelFactory());           
-              
+              .factory(modelFactory());
   }
 
   @Bean
